@@ -3,6 +3,36 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* Golden Yellow */
+  --golden-yellow-base: #ffdf00;
+  --golden-yellow-shade-200: #ccb200;
+  --golden-yellow-shade-400: #998600;
+  --golden-yellow-shade-600: #665900;
+  --golden-yellow-shade-800: #332d00;
+  --golden-yellow-tint-200: #ffe533;
+  --golden-yellow-tint-400: #ffec66;
+  --golden-yellow-tint-600: #fff299;
+  --golden-yellow-tint-800: #fff9cc;
+  /* Blue Fjord */
+  --blue-fjord-base: #007190;
+  --blue-fjord-shade-200: #005a73;
+  --blue-fjord-shade-400: #004456;
+  --blue-fjord-shade-600: #002d3a;
+  --blue-fjord-shade-800: #00171d;
+  --blue-fjord-tint-200: #338da6;
+  --blue-fjord-tint-400: #66aabc;
+  --blue-fjord-tint-600: #99c6d3;
+  --blue-fjord-tint-800: #cce3e9;
+  /* Gale Force */
+  --gale-force-base: #34454c;
+  --gale-force-shade-200: #2a373d;
+  --gale-force-shade-400: #1f292e;
+  --gale-force-shade-600: #151c1e;
+  --gale-force-shade-800: #0a0e0f;
+  --gale-force-tint-200: #5d6a70;
+  --gale-force-tint-400: #858f94;
+  --gale-force-tint-600: #aeb5b7;
+  --gale-force-tint-800: #d6dadb;
 }
 
 @theme inline {
@@ -22,5 +52,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-custom), Arial, Helvetica, sans-serif;
 }
