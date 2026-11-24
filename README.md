@@ -1,5 +1,33 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Database Setup (Azure SQL)
+
+The app connects to an Azure SQL database through [`src/lib/db.ts`](src/lib/db.ts) (server-side only).
+
+1. Copy `.env.example` to `.env` and replace the placeholder password with the real one:
+
+   ```
+   DB_SERVER=wegettinga98causeweregoated.database.windows.net
+   DB_NAME=application
+   DB_USER=application
+   DB_PASSWORD="your-password"
+   ```
+
+   Wrap the password in quotes. Without them, a `#` (or `$`) in the password is parsed incorrectly and the login fails. Never commit `.env`; it is gitignored.
+
+2. Run `npm run dev` and open [http://localhost:3000/api/db-check](http://localhost:3000/api/db-check). You should see `{"ok":true,"db":"application"}`.
+
+`/api/db-check` is a temporary connectivity check.
+
+In server code, use the shared pool:
+
+```ts
+import { getPool } from "@/lib/db";
+
+const pool = await getPool();
+const result = await pool.request().query("SELECT TOP 5 * FROM book");
+```
+
 ## Getting Started
 
 First, run the development server:
