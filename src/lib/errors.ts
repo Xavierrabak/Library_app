@@ -5,6 +5,7 @@ export type ErrorCode =
   | "COPY_NOT_FOUND"
   | "SHELF_NOT_FOUND"
   | "SHELF_FULL"
+  | "ACCOUNT_NOT_FOUND"
   | "COPY_ON_LOAN"
   | "COPY_ON_HOLD"
   | "NOT_ON_LOAN";
@@ -16,6 +17,7 @@ const STATUS_BY_CODE: Record<ErrorCode, number> = {
   COPY_NOT_FOUND: 404,
   SHELF_NOT_FOUND: 404,
   SHELF_FULL: 409,
+  ACCOUNT_NOT_FOUND: 404,
   COPY_ON_LOAN: 409,
   COPY_ON_HOLD: 409,
   NOT_ON_LOAN: 409,

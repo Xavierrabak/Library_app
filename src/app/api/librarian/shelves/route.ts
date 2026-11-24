@@ -4,7 +4,7 @@ import { errorResponse } from "@/lib/errors";
 
 export async function GET(request: Request) {
   try {
-    await requireLibrarian(getActorLoginId(request));
+    await requireLibrarian(await getActorLoginId(request));
     return Response.json({ ok: true, shelves: await listShelves() });
   } catch (err) {
     return errorResponse(err);

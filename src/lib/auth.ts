@@ -1,20 +1,17 @@
 import "server-only";
 import { getPool } from "./db";
 import { ServiceError } from "./errors";
+import { SESSION_COOKIE, verifySession } from "./sessionToken";
 
-// Placeholder until the authentication/session work lands: the login ID is read
-// from this cookie, and role checks always go to the account table.
-export const SESSION_COOKIE = "lcs_login_id";
+export { SESSION_COOKIE };
 
-export function getActorLoginId(request: Request): string | null {
+// Reads the signed session cookie; returns null when it is missing or has been tampered with.
+export async function getActorLoginId(request: Request): Promise<string | null> {
   const header = request.headers.get("cookie");
   if (!header) return null;
   for (const part of header.split(";")) {
     const [name, ...rest] = part.trim().split("=");
-    if (name === SESSION_COOKIE) {
-      const value = decodeURIComponent(rest.join("="));
-      return value || null;
-    }
+    if (name === SESSION_COOKIE) return (await verifySession(rest.join("=")))?.loginId ?? null;
   }
   return null;
 }
