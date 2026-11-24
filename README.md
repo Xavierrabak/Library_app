@@ -28,6 +28,25 @@ const pool = await getPool();
 const result = await pool.request().query("SELECT TOP 5 * FROM book");
 ```
 
+## Librarian Operations (books, shelves, next-day)
+
+Pages: `/AdminDash` (dashboard + next-day button), `/AdminDash/AddBook`, `/AdminDash/RemoveBook`, `/AdminDash/MoveBook`.
+Logic lives in `src/lib/inventory.ts` and `src/lib/nextDay.ts`; the routes under `src/app/api/librarian/` are thin wrappers.
+
+- Every action checks that the signed-in account has `accountType = 'librarian'` (401 with no account, 403 for patrons). Until the real login/session work lands, the account is read from the `lcs_login_id` cookie in `src/lib/auth.ts`; replace `getActorLoginId` there when sessions exist.
+- A shelf holds at most 50 copies (`shelf.capacity` is capped at 50). Adds and moves lock the shelf row inside a transaction, so concurrent requests can't overfill it.
+- Copies that are on loan or have a waiting hold cannot be removed.
+- Next-day processing is run once per date (recorded in `next_day_run`). It fines overdue loans (`FINE_PER_OVERDUE_DAY` in `src/lib/config.ts`, currently $1/day, max $99.99 per loan), expires holds past their expiration date, and rolls back fully if anything fails.
+
+Setup and tests:
+
+```bash
+npm run db:migrate   # creates the next_day_run table (safe to re-run)
+npm test             # integration tests against the database in .env
+```
+
+The tests cover cases BM-01 to BM-15, SC-01 to SC-10 and ND-01 to ND-13 from the test-case document. They create temporary rows (prefixed `__LCS_TEST__` / `zz_lcs_test_`) and delete them afterwards.
+
 ## Getting Started
 
 First, run the development server:

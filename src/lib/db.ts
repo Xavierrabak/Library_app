@@ -28,3 +28,29 @@ export function getPool(): Promise<sql.ConnectionPool> {
 }
 
 export { sql };
+
+const DEADLOCK_VICTIM = 1205;
+
+// Runs `work` in a transaction, rolling back on any error and retrying deadlock victims.
+export async function withTransaction<T>(
+  work: (tx: sql.Transaction) => Promise<T>,
+): Promise<T> {
+  for (let attempt = 1; ; attempt++) {
+    const tx = new sql.Transaction(await getPool());
+    await tx.begin();
+    try {
+      const result = await work(tx);
+      await tx.commit();
+      return result;
+    } catch (err) {
+      try {
+        await tx.rollback();
+      } catch {
+        // already rolled back by the server
+      }
+      const number = (err as { number?: number }).number;
+      if (number === DEADLOCK_VICTIM && attempt < 3) continue;
+      throw err;
+    }
+  }
+}
