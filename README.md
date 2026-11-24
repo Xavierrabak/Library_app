@@ -33,7 +33,15 @@ const result = await pool.request().query("SELECT TOP 5 * FROM book");
 Pages: `/AdminDash` (dashboard + next-day button), `/AdminDash/AddBook`, `/AdminDash/RemoveBook`, `/AdminDash/MoveBook`.
 Logic lives in `src/lib/inventory.ts` and `src/lib/nextDay.ts`; the routes under `src/app/api/librarian/` are thin wrappers.
 
-- Every action checks that the signed-in account has `accountType = 'librarian'` (401 with no account, 403 for patrons). Until the real login/session work lands, the account is read from the `lcs_login_id` cookie in `src/lib/auth.ts`; replace `getActorLoginId` there when sessions exist.
+- Every action checks that the signed-in account has `accountType = 'librarian'` (401 with no account, 403 for patrons).
+
+## Login, sessions and access control (localhost only)
+
+- The login page (`/`) checks the login ID and password against the `account` table (passwords are stored as plain text) and sets an HMAC-signed `lcs_login_id` cookie (`src/lib/sessionToken.ts`). The signing key is `SESSION_SECRET` from `.env`, falling back to `DB_PASSWORD`. This is for local use only and isn't hardened for deployment.
+- `src/proxy.ts` locks every page and API route except `/`, `/ForgotPassword`, `/api/session` and `/api/password-reset`. Signed-out visitors are redirected to `/`. `/AdminDash/*`, `/CreateAccount` and `/api/librarian/*` are librarian-only; patrons are redirected to `/UserDash` (403 for the API).
+- The profile icon (top right, shown when signed in) shows the user's name, login ID and role, and has a **Log out** button.
+- `/ForgotPassword`: enter login ID + full name; if they match an account you can set a new password (8+ characters).
+- `npm run db:migrate` also seeds shelves 1-10 (capacity 50) when the `shelf` table is empty.
 - A shelf holds at most 50 copies (`shelf.capacity` is capped at 50). Adds and moves lock the shelf row inside a transaction, so concurrent requests can't overfill it.
 - Copies that are on loan or have a waiting hold cannot be removed.
 - Next-day processing is run once per date (recorded in `next_day_run`). It fines overdue loans (`FINE_PER_OVERDUE_DAY` in `src/lib/config.ts`, currently $1/day, max $99.99 per loan), expires holds past their expiration date, and rolls back fully if anything fails.
@@ -41,7 +49,7 @@ Logic lives in `src/lib/inventory.ts` and `src/lib/nextDay.ts`; the routes under
 Setup and tests:
 
 ```bash
-npm run db:migrate   # creates the next_day_run table (safe to re-run)
+npm run db:migrate   # creates next_day_run and seeds shelves (safe to re-run)
 npm test             # integration tests against the database in .env
 ```
 

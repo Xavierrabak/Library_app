@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
+import { ProfileMenu } from "./_components/ProfileMenu";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +32,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${myCustomFont.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Suspense fallback={null}>
+          <ProfileMenu />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }
